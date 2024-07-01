@@ -1,0 +1,20 @@
+# category-resource
+
+- php artisan make:filament-resource Category --generate --view --soft-deletes
+  ini akan error, karena menggunakan soft-deletes, solusi ada di file error_soft_delete
+
+- pada bagian model tambahkan fillable  
+  'code' protected $fillable = ['name', 'slug', 'description', 'status'];
+
+Dalam model Laravel, $fillable berfungsi sebagai mekanisme keamanan untuk mencegah serangan pengisian massal (mass assignment) pada database Anda.
+
+Serangan pengisian massal terjadi ketika penyerang mengirim data berbahaya melalui formulir atau permintaan HTTP lainnya. Data ini dapat berisi informasi yang tidak diinginkan, seperti mengubah hak akses pengguna atau memasukkan data palsu.
+
+## Cara Kerja $fillable
+- $fillable adalah properti array yang didefinisikan di dalam model Anda.
+- Ini mencantumkan daftar kolom yang diizinkan untuk diisi secara massal saat menggunakan metode seperti create, update, atau fill pada model.
+- Ketika Anda mencoba mengisi data ke dalam model, Laravel akan hanya mempertimbangkan kolom yang ada di dalam properti $fillable.
+- Kolom lain yang dikirimkan dalam data akan diabaikan, sehingga mencegah penyerang untuk memodifikasi informasi sensitif atau tidak sah.
+
+
+    protected $casts=['slug' => 'array'];   
