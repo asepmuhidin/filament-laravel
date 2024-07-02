@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Section;
+use Filament\Notifications\Notification;
 
 class CategoryResource extends Resource
 {
@@ -32,18 +34,24 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Section::make('Create Category')
+                    ->description('create new category data')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('description')
+                Forms\Components\TagsInput::make('slug')
+                    ->required(),
+                    
+                Forms\Components\MarkdownEditor::make('description')
                     ->maxLength(255)
-                    ->default(null),
+                    ->default(null)
+                    ->columnSpan('full'),
                 Forms\Components\Toggle::make('status')
                     ->required(),
-            ]);
+                    ])->columns(2),
+                
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -51,8 +59,10 @@ class CategoryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
+                    ->sortable()    
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
@@ -73,6 +83,14 @@ class CategoryResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+                ->successNotification(
+                    Notification::make()
+                     ->success()    
+                     ->title('Category deleted')
+                     ->body('The Category deleted succesfully')             
+                 )
+                ,
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -94,9 +112,13 @@ class CategoryResource extends Resource
     {
         return [
             'index' => Pages\ListCategories::route('/'),
-            'create' => Pages\CreateCategory::route('/create'),
+             
+           //bagian ini di comment untuk menjadikan page pop up
+           'create' => Pages\CreateCategory::route('/create'),
             'view' => Pages\ViewCategory::route('/{record}'),
             'edit' => Pages\EditCategory::route('/{record}/edit'),
+            // */
+
         ];
     }
 
@@ -106,5 +128,9 @@ class CategoryResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    protected function getSavedNotificationTitle(): string{
+        return 'Category Saved';
     }
 }
