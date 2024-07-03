@@ -23,7 +23,7 @@ class CategoryResource extends Resource
     protected static ?string $navigationLabel = 'Categories';
     protected static ?string $modelLabel = 'Product Categories';
     protected static ?string $recordTitleAttribute = 'Data Category';
-    protected static?int $navigationSort = 1;
+    protected static?int $navigationSort = 3;
 
     public static function getNavigationBadge(): ?string
     {
@@ -67,6 +67,7 @@ class CategoryResource extends Resource
                 Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\IconColumn::make('status')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
