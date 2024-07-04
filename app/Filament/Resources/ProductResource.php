@@ -17,6 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Forms\Components\Group;
 use Illuminate\Support\Str;
 use Filament\Forms\Set;
+use Carbon\Carbon;
 
 class ProductResource extends Resource
 {
@@ -35,13 +36,11 @@ class ProductResource extends Resource
     {
         return static::getModel()::count();
     }
+
     
-    public function getSKU(): ?string
-    {
-        return $this->model->generateSKU();
-    }
     public static function form(Form $form): Form
     {
+        
         return $form
             ->schema([
                 Group::make()
@@ -58,8 +57,9 @@ class ProductResource extends Resource
                                         if($operation !=='create'){
                                             return ;
                                         }
+                                        $sku=Product::generateSKU();
                                         $set('slug', Str::slug($state));
-                                        $set('sku', $this->model->generateSKU());
+                                        $set('sku', $sku);
                                     })
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('slug')
@@ -77,17 +77,36 @@ class ProductResource extends Resource
                                     ->columnSpanFull(),     
                             ])->columns(5),
                         Section::make('Price and Quantity')
-                            ->schema([
-                                
-                            ])    
+                        ->schema([
+                            Forms\Components\TextInput::make('price')
+                                ->required()
+                                ->numeric()
+                                ->default(0.00)
+                                ->prefix('Rp.'),
+                            Forms\Components\TextInput::make('quantity')
+                                ->required()
+                                ->numeric()
+                                ->default(0),
+                        ])->columns(2),  
                     ])->columns(2)->columnspan(2),
                 
                 Group::make()
                     ->schema([
                         Section::make('Image')
                             ->schema([
-                                
-                            ])
+                                Forms\Components\Select::make('category_id')
+                                ->relationship('category', 'name')
+                                ->required(),
+                            Forms\Components\Select::make('brand_id')
+                                ->relationship('brand', 'name')
+                                ->required(),      
+                        Forms\Components\FileUpload::make('image')
+                            ->image()
+                            ->imageEditor()
+                            ->disk('public')
+                            ->directory('images/product/'.Carbon::now()->format('FY'))                            ,
+                        Forms\Components\Toggle::make('status')
+                        ])
                     ])->columns(1)        
            ])->columns(3);
     }
@@ -96,20 +115,20 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('brand_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('sku')
-                    ->label('SKU')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
                 Tables\Columns\ImageColumn::make('image'),
+                Tables\Columns\TextColumn::make('sku')
+                ->label('SKU')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('name')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('slug')
+                ->searchable(),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('brand.name')
+                          ->sortable(),
+             
+                
                 Tables\Columns\TextColumn::make('status')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')

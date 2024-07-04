@@ -24,8 +24,11 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function generateSKU():string 
+    public static function generateSKU() 
     {
-        return 'SK-'.$this->id;
+        $lastrec=self::latest()->first();
+        $nextsku=$lastrec ? intval(substr($lastrec->sku, -7)) : 0; 
+        return 'SK'.str_pad($nextsku+1,7,'0',STR_PAD_LEFT);
+       
     }
 }

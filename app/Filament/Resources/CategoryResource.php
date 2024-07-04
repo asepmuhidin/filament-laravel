@@ -62,9 +62,11 @@ class CategoryResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
+                    ->limit(25)
                     ->sortable()    
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
+                    ->limit(60)
                     ->searchable(),
                 Tables\Columns\IconColumn::make('status')
                     ->toggleable(isToggledHiddenByDefault: true)
